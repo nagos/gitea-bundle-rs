@@ -1,28 +1,26 @@
 pub mod gitea;
 
 use gitea::Gitea;
-use serde::Deserialize;
 use std::env;
 
-#[derive(Deserialize, Debug)]
-struct Org {
-    username: String
-}
 
 fn main() {
     let token = env::var("GITEA_TOKEN").unwrap();
-    let request_url = format!("http://dev.profitt.ru/api/v1/orgs?access_token={token}");
-    
-    println!("{}", request_url);
-    let response = reqwest::blocking::get(&request_url).unwrap();
+    let url = env::var("GITEA_HOST").unwrap();
 
-
-    let users: Vec<Org> = response.json().unwrap();
-    println!("{:?}", users);
-
-    let gitea = Gitea::build(token);
-    
-    for repo in gitea.into_repos() {
-        dbg!(repo);
+    let gitea = Gitea::build(url, token);
+    let orgs = gitea.get_orgs();
+    for org in orgs {
+        let repos = gitea.get_org_repos(org.clone());
+        for r in repos {
+            println!("{org} {r}");
+        }
+    }
+    let users = gitea.get_users();
+    for user in users {
+        let repos = gitea.get_user_repos(user.clone());
+        for r in repos {
+            println!("{user} {r}");
+        }
     }
 }
