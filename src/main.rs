@@ -2,15 +2,13 @@ pub mod gitea;
 pub mod config;
 pub mod error;
 
-use gitea::Gitea;
 use std::env;
-use tempdir::TempDir;
-use git2::{FetchOptions, RemoteCallbacks};
-use git2::Cred;
-use git2::build::RepoBuilder;
 use std::process::Command;
+use tempdir::TempDir;
+use git2::{FetchOptions, RemoteCallbacks, Cred, build::RepoBuilder};
 use config::Config;
 use error::Error;
+use gitea::Gitea;
 
 /// Create repository bundle
 /// # Arguments
@@ -55,26 +53,19 @@ fn url_to_path(url: &str) -> String {
     format!("{repo_user}_{repo_name}")
 }
 
-fn run() -> Result<(), Error> {
-    let config = Config::from_args();
-    
+fn run(config: Config, gitea: Gitea) -> Result<(), Error> {
     let cwd = env::current_dir().unwrap().into_os_string().into_string().unwrap();
-    let gitea = Gitea::build(config.host.clone(), config.token.clone());
 
-    let orgs = gitea.get_orgs()?;
-    for org in orgs {
-        let repos = gitea.get_org_repos(org.clone())?;
-        for r in repos {
+    for org in gitea.get_orgs()? {
+        for r in gitea.get_org_repos(&org)? {
             println!("Bundling {r}");
             let p = format!("{}/{}", cwd, url_to_path(&r));
             bundle_repo(&r, &p, &config.token)?;
         }
     }
 
-    let users = gitea.get_users()?;
-    for user in users {
-        let repos = gitea.get_user_repos(user.clone())?;
-        for r in repos {
+    for user in gitea.get_users()? {
+        for r in gitea.get_user_repos(&user)? {
             println!("Bundling {r}");
             let p = format!("{}/{}", cwd, url_to_path(&r));
             bundle_repo(&r, &p, &config.token)?;
@@ -84,7 +75,10 @@ fn run() -> Result<(), Error> {
 }
 
 fn main() {
-    if let Err(e) = run() {
+    let config = Config::from_args();
+    let gitea = Gitea::build(config.host.clone(), config.token.clone());
+
+    if let Err(e) = run(config, gitea) {
         println!("Bundling failed: {e}");
     }
 }

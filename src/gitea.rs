@@ -1,7 +1,7 @@
 use std::vec;
 use reqwest::blocking::Response;
-use serde::Deserialize;
 use reqwest::header::AUTHORIZATION;
+use serde::Deserialize;
 use crate::error::Error;
 
 /// Gitea api module
@@ -40,7 +40,7 @@ impl Gitea {
 
     /// Perform API request
     /// * `url` - API url, without host
-    fn api_get(&self, url: String) -> Result<Response, Error> {
+    fn api_get(&self, url: &str) -> Result<Response, Error> {
         let client = reqwest::blocking::Client::new();
         let result = client
             .get(format!("{}{}", self.host, url))
@@ -58,7 +58,8 @@ impl Gitea {
 
     /// List Gitea orgs
     pub fn get_orgs(&self) -> Result<Vec<String>, Error> {
-        let orgs: Vec<Org> = self.api_get(String::from("/api/v1/orgs"))?.json().unwrap_or_default();
+        let orgs: Vec<Org> = self.api_get("/api/v1/orgs")?
+            .json().unwrap_or_default();
         let mut ret: Vec<String> = vec![];
         for org in orgs {
             ret.push(org.username)
@@ -68,7 +69,8 @@ impl Gitea {
 
     /// List Gitea users
     pub fn get_users(&self) -> Result<Vec<String>, Error> {
-        let users: Vec<User> = self.api_get(String::from("/api/v1/admin/users"))?.json().unwrap_or_default();
+        let users: Vec<User> = self.api_get("/api/v1/admin/users")?
+            .json().unwrap_or_default();
         let mut ret: Vec<String> = vec![];
         for user in users {
             ret.push(user.login)
@@ -78,10 +80,11 @@ impl Gitea {
 
     /// Get org repositories
     /// * `org` - Organisation
-    pub fn get_org_repos(&self, org: String) -> Result<Vec<String>, Error> {
+    pub fn get_org_repos(&self, org: &str) -> Result<Vec<String>, Error> {
         let mut ret: Vec<String> = vec![];
         for page in 1.. {
-            let repos: Vec<Repo> = self.api_get(format!("/api/v1/orgs/{org}/repos?page={page}"))?.json().unwrap_or_default();
+            let repos: Vec<Repo> = self.api_get(&format!("/api/v1/orgs/{org}/repos?page={page}"))?
+                .json().unwrap_or_default();
             if repos.is_empty() {
                 break;
             }
@@ -94,10 +97,11 @@ impl Gitea {
 
     /// Get user repositories
     /// * `user` - User
-    pub fn get_user_repos(&self, user: String) -> Result<Vec<String>, Error> {
+    pub fn get_user_repos(&self, user: &str) -> Result<Vec<String>, Error> {
         let mut ret: Vec<String> = vec![];
         for page in 1.. {
-            let repos: Vec<Repo> = self.api_get(format!("/api/v1/users/{user}/repos?page={page}"))?.json().unwrap();
+            let repos: Vec<Repo> = self.api_get(&format!("/api/v1/users/{user}/repos?page={page}"))?
+                .json().unwrap();
             if repos.is_empty() {
                 break;
             }
