@@ -2,6 +2,7 @@ use clap::{arg, Command};
 use std::env;
 use std::ffi::OsString;
 
+/// Command line options
 #[derive(PartialEq, Debug)]
 pub struct Config {
     pub host: String,
@@ -9,10 +10,12 @@ pub struct Config {
 }
 
 impl Config {
+    /// Create option from command line arguments
     pub fn from_args() -> Self {
         Config::build_from(env::args_os())
     }
 
+    /// Create options from iterator
     fn build_from<I, T>(args: I) -> Self 
     where
         I: IntoIterator<Item = T>,

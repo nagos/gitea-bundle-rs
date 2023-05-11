@@ -3,6 +3,7 @@ use reqwest::blocking::Response;
 use serde::Deserialize;
 use reqwest::header::AUTHORIZATION;
 
+/// Gitea api module
 pub struct Gitea {
     token: String,
     host: String,
@@ -24,11 +25,16 @@ struct Repo {
 }
 
 impl Gitea {
+    /// Create struct
+    /// * `host` - url of gitea host
+    /// * `token` - gitea access token
     pub fn build(host: String, token: String) -> Self {
         Self { host, token }
     }
 
-    pub fn api_get(&self, url: String) -> Response {
+    /// Perform API request
+    /// * `url` - API url, without host
+    fn api_get(&self, url: String) -> Response {
         let client = reqwest::blocking::Client::new();
         client
             .get(format!("{}{}", self.host, url))
@@ -37,6 +43,7 @@ impl Gitea {
             .unwrap()
     }
 
+    /// List Gitea orgs
     pub fn get_orgs(&self) -> Vec<String> {
         let orgs: Vec<Org> = self.api_get(String::from("/api/v1/orgs")).json().unwrap();
         let mut ret: Vec<String> = vec![];
@@ -46,6 +53,7 @@ impl Gitea {
         ret
     }
 
+    /// List Gitea users
     pub fn get_users(&self) -> Vec<String> {
         let users: Vec<User> = self.api_get(String::from("/api/v1/admin/users")).json().unwrap();
         let mut ret: Vec<String> = vec![];
@@ -55,6 +63,8 @@ impl Gitea {
         ret
     }
 
+    /// Get org repositories
+    /// * `org` - Organisation
     pub fn get_org_repos(&self, org: String) -> Vec<String> {
         let mut ret: Vec<String> = vec![];
         for page in 1.. {
@@ -69,6 +79,8 @@ impl Gitea {
         ret
     }
 
+    /// Get user repositories
+    /// * `user` - User
     pub fn get_user_repos(&self, user: String) -> Vec<String> {
         let mut ret: Vec<String> = vec![];
         for page in 1.. {

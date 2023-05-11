@@ -10,6 +10,11 @@ use git2::build::RepoBuilder;
 use std::process::Command;
 use config::Config;
 
+/// Create repository bundle
+/// # Arguments
+/// * `url` - git clone url
+/// * `path` - path to bundle file
+/// * `token` - gitea access token
 fn bundle_repo(url: &str, path: &str, token: &str) {
     let tmp_dir = TempDir::new("gitea-bundle").unwrap();
 
@@ -30,6 +35,9 @@ fn bundle_repo(url: &str, path: &str, token: &str) {
         .output().expect("Git failed");
 }
 
+/// Convert clone url to bundle file name
+/// # Arguments
+/// * `url` - git clone url
 fn url_to_path(url: &str) -> String {
     let v: Vec<&str> = url.split('/').collect();
     let repo_name = v[v.len()-1];
@@ -46,7 +54,7 @@ fn main() {
     for org in orgs {
         let repos = gitea.get_org_repos(org.clone());
         for r in repos {
-            println!("{org} {r}");
+            println!("Bundling {r}");
             let p = format!("{}/{}", cwd, url_to_path(&r));
             bundle_repo(&r, &p, &config.token);
         }
@@ -55,7 +63,7 @@ fn main() {
     for user in users {
         let repos = gitea.get_user_repos(user.clone());
         for r in repos {
-            println!("{user} {r}");
+            println!("Bundling {r}");
             let p = format!("{}/{}", cwd, url_to_path(&r));
             bundle_repo(&r, &p, &config.token);
         }
