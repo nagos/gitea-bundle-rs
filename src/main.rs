@@ -48,7 +48,7 @@ fn bundle_repo(url: &str, path: &str, token: &str) -> Result<(), Error> {
 /// * `url` - git clone url
 fn url_to_path(url: &str) -> String {
     let v: Vec<&str> = url.split('/').collect();
-    let repo_name = v[v.len()-1];
+    let repo_name = v[v.len()-1].replace(".git", ".bundle");
     let repo_user = v[v.len()-2];
     format!("{repo_user}_{repo_name}")
 }
