@@ -47,11 +47,11 @@ impl Gitea {
             .header(AUTHORIZATION, format!("token {}", self.token))
             .send()?;
         
-        if !result.status().is_success() {
+        if result.status().is_success() {
+            Ok(result)
+        } else {
             let msg: ApiError = result.json().unwrap_or_default();
             Err(Error::ApiError(msg.message))
-        } else {
-            Ok(result)
         }
     }
 
@@ -100,7 +100,7 @@ impl Gitea {
         let mut ret: Vec<String> = vec![];
         for page in 1.. {
             let repos: Vec<Repo> = self.api_get(&format!("/api/v1/users/{user}/repos?page={page}"))?
-                .json().unwrap();
+                .json().unwrap_or_default();
             if repos.is_empty() {
                 break;
             }
