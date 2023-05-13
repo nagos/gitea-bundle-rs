@@ -45,8 +45,7 @@ impl Gitea {
         let result = client
             .get(format!("{}{}", self.host, url))
             .header(AUTHORIZATION, format!("token {}", self.token))
-            .send()
-            .map_err(Error::RequestError)?;
+            .send()?;
         
         if !result.status().is_success() {
             let msg: ApiError = result.json().unwrap_or_default();

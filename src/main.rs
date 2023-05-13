@@ -27,14 +27,12 @@ fn bundle_repo(url: &str, path: &str, token: &str) -> Result<(), Error> {
         .fetch_options(fo)
         .bare(true)
         .remote_create(|repo,name,url| repo.remote_with_fetch(name, url, "+refs/*:refs/*"))
-        .clone(url, tmp_dir.path())
-        .map_err(Error::GitCloneError)?;
+        .clone(url, tmp_dir.path())?;
     
     let output = Command::new("git")
         .args(["bundle", "create", path, "--all"])
         .current_dir(tmp_dir.path())
-        .output()
-        .map_err(Error::GitIoError)?
+        .output()?
         ;
     if !output.status.success() {
         Err(Error::GitError)
