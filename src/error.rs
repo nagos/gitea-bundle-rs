@@ -5,14 +5,14 @@ use git2;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Request error: {0}")]
+    #[error("Request error")]
     RequestError(#[from] reqwest::Error),
-    #[error("Api request failed: {0}")]
+    #[error("Api request failed")]
     ApiError(String),
-    #[error("Git Error: {0}")]
+    #[error("Git Error")]
     GitIoError(#[from] io::Error),
     #[error("Git command failed")]
     GitError,
-    #[error("Git clone failed: {0}")]
+    #[error("Git clone failed")]
     GitCloneError(#[from] git2::Error),
 }

@@ -34,8 +34,11 @@ impl Gitea {
     /// Create struct
     /// * `host` - url of gitea host
     /// * `token` - gitea access token
-    pub fn build(host: String, token: String) -> Self {
-        Self { host, token }
+    pub fn build(host: &str, token: &str) -> Self {
+        Self { 
+            host: String::from(host), 
+            token: String::from(token),
+        }
     }
 
     /// Perform API request
